@@ -102,8 +102,8 @@ class BlogCategoryController extends ApiBaseController
     {
         $this->authorize('store', BlogCategory::class);
         $data =[ 'name' => $request->name ];
-        $category = BlogCategory::create($data);
-        return $this->sendResponse($category, 'Blog category created successfully.', Response::HTTP_CREATED);
+        BlogCategory::create($data);
+        return $this->sendResponse(TRUE, 'Blog category created successfully.', Response::HTTP_CREATED);
     }
 
     /**
@@ -143,7 +143,7 @@ class BlogCategoryController extends ApiBaseController
         $this->authorize('update', BlogCategory::class);
         $data =[ 'name' => $request->name ];
         $blogCategory->update($data);
-        return $this->sendResponse(new BlogCategoryResource($blogCategory), 'Blog category updated successfully.', Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE, 'Blog category updated successfully.', Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -180,6 +180,6 @@ class BlogCategoryController extends ApiBaseController
     {
         $this->authorize('delete', BlogCategory::class);
         $blogCategory->delete();
-        return $this->sendResponse(NULL,'Blog category deleted successfully.',Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Blog category deleted successfully.',Response::HTTP_ACCEPTED);
     }
 }

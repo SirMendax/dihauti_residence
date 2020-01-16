@@ -42,7 +42,7 @@ class LoginController extends ApiBaseController
             'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
             'user'=> Str::slug($user->name),
             'id'=> $user->id,
-            'role'=> json_encode(RoleResource::collection($user->roles()->get()))
+            'role'=> $user->roles()->count() > 0 ? json_encode(RoleResource::collection($user->roles()->get())) : 0
         ], 200);
     }
 }

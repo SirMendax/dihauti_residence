@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
+use App\Http\Requests\PostRequest;
 use App\Models\Blog\BlogPost;
+use App\Repositories\PostRepository;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +25,7 @@ class BlogPostController extends ApiBaseController
      * Returns list of projects
      *
      * Display a listing of the resource.
+     * @param PostRepository $postRepository
      * @return JsonResponse
      *
      * @OA\Get(
@@ -47,22 +50,10 @@ class BlogPostController extends ApiBaseController
      *     @OA\Response(response=404, description="Resource Not Found"),
      * )
      */
-    public function index()
+    public function index(PostRepository $postRepository)
     {
-        $post = BlogPost::latest()->paginate(5);
-        $response = [
-            'pagination' => [
-                'total' => $post->total(),
-                'per_page' => $post->perPage(),
-                'current_page' => $post->currentPage(),
-                'last_page' => $post->lastPage(),
-                'from' => $post->firstItem(),
-                'to' => $post->lastItem()
-            ],
-            'data' => BlogPostResource::collection($post)
-        ];
-
-        return $this->sendResponse($response, 'Blog posts retrieved successfully.');
+        $posts = $postRepository->getPagination();
+        return $this->sendResponse($posts, 'Blog posts retrieved successfully.');
     }
 
     /**
@@ -103,10 +94,10 @@ class BlogPostController extends ApiBaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param PostRequest $request
+     * @param PostRepository $postRepository
      * @return JsonResponse
      * @throws AuthorizationException
-     *
      * @OA\Post(
      *     path="/posts",
      *     operationId="postCreate",
@@ -121,25 +112,20 @@ class BlogPostController extends ApiBaseController
      *       ),
      *      @OA\Response(response=400, description="Bad request"),
      * )
-     **/
-    public function store(Request $request)
+     */
+    public function store(PostRequest $request, PostRepository $postRepository)
     {
         $this->authorize('store', BlogPost::class);
-        $filterData = [
-          'title' => $request->title,
-          'blog_category_id' => $request->blog_category_id,
-          'body' => Purifier::clean($request->body),
-          'description' => Purifier::clean($request->description),
-       ];
-        $blogPost = auth('api')->user()->blogPost()->create($filterData);
-        return $this->sendResponse(new BlogPostResource($blogPost), 'Blog post created successfully.', Response::HTTP_CREATED);
+        $postRepository->store($request);
+        return $this->sendResponse(TRUE, 'Blog post created successfully.', Response::HTTP_CREATED);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param PostRequest $request
      * @param BlogPost $post
+     * @param PostRepository $postRepository
      * @return JsonResponse
      * @throws AuthorizationException
      * @OA\Put(
@@ -166,16 +152,11 @@ class BlogPostController extends ApiBaseController
      *      @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function update(Request $request, BlogPost $post)
+    public function update(PostRequest $request, BlogPost $post, PostRepository $postRepository)
     {
         $this->authorize('update', $post);
-        $filterData = [
-          'title' => $request->title,
-          'body' => Purifier::clean($request->body),
-          'description' => Purifier::clean($request->description),
-       ];
-        $post->update($filterData);
-        return $this->sendResponse($post,'Post updated successfully',Response::HTTP_ACCEPTED);
+        $postRepository->update($post, $request);
+        return $this->sendResponse(TRUE,'Post updated successfully',Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -213,7 +194,7 @@ class BlogPostController extends ApiBaseController
     {
         $this->authorize('delete', $post);
         $post->delete();
-        return $this->sendResponse(NULL,'Post deleted successfully', Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Post deleted successfully', Response::HTTP_ACCEPTED);
     }
 
     /**

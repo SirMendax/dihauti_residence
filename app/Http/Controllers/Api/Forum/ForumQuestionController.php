@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api\Forum;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
+use App\Http\Requests\QuestionRequest;
 use App\Http\Resources\Forum\ForumQuestionResource;
 use App\Models\Forum\ForumQuestion;
 use App\Models\Forum\ForumCategory;
-use Exception;
+use App\Repositories\QuestionRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Mews\Purifier\Facades\Purifier;
 
 class ForumQuestionController extends ApiBaseController
 {
@@ -81,10 +81,10 @@ class ForumQuestionController extends ApiBaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param QuestionRequest $request
+     * @param QuestionRepository $questionRepository
      * @return JsonResponse
      * @throws AuthorizationException
-     *
      * @OA\Post(
      *     path="/questions",
      *     operationId="questionCreate",
@@ -100,16 +100,11 @@ class ForumQuestionController extends ApiBaseController
      *      @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function store(Request $request)
+    public function store(QuestionRequest $request, QuestionRepository $questionRepository)
     {
         $this->authorize('store', ForumQuestion::class);
-        $filterData = [
-          'title' => $request->title,
-          'forum_category_id' => $request->forum_category_id,
-          'body' => Purifier::clean($request->body),
-       ];
-        $question = auth('api')->user()->forumQuestion()->create($filterData);
-        return $this->sendResponse(new ForumQuestionResource($question), 'Question created successfully.', Response::HTTP_CREATED);
+        $questionRepository->store($request);
+        return $this->sendResponse(TRUE, 'Question created successfully.', Response::HTTP_CREATED);
     }
 
     /**
@@ -117,6 +112,7 @@ class ForumQuestionController extends ApiBaseController
      *
      * @param Request $request
      * @param ForumQuestion $question
+     * @param QuestionRepository $questionRepository
      * @return JsonResponse
      * @throws AuthorizationException
      * @OA\Put(
@@ -143,15 +139,11 @@ class ForumQuestionController extends ApiBaseController
      *      @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function update(Request $request, ForumQuestion $question)
+    public function update(QuestionRequest $request, ForumQuestion $question,  QuestionRepository $questionRepository)
     {
         $this->authorize('update', $question);
-        $filterData = [
-          'title' => $request->title,
-          'body' => Purifier::clean($request->body),
-       ];
-        $question->update($filterData);
-        return $this->sendResponse($question,'Question updated successfully',Response::HTTP_ACCEPTED);
+        $questionRepository->update($question, $request);
+        return $this->sendResponse(TRUE,'Question updated successfully',Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -188,7 +180,7 @@ class ForumQuestionController extends ApiBaseController
     {
         $this->authorize('delete', $question);
         $question->delete();
-        return $this->sendResponse(NULL,'Question deleted successfully', Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Question deleted successfully', Response::HTTP_ACCEPTED);
     }
 
     /**

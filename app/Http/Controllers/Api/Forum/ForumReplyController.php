@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
 use App\Http\Resources\Forum\ForumReplyResource;
 use App\Models\Forum\ForumQuestion;
 use App\Models\Forum\ForumReply;
+use App\Repositories\ReplyRepository;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +25,7 @@ class ForumReplyController extends ApiBaseController
      * Display a listing of the resource.
      *
      * @param ForumQuestion $question
+     * @param ReplyRepository $replyRepository
      * @return JsonResponse
      *
      * @OA\Get(
@@ -57,22 +59,10 @@ class ForumReplyController extends ApiBaseController
      *     @OA\Response(response=404, description="Resource Not Found"),
      * )
      */
-    public function index(ForumQuestion $question)
+    public function index(ForumQuestion $question, ReplyRepository $replyRepository)
     {
-        $replies = ForumReply::where('forum_question_id', $question->id)->paginate(10);
-        $response = [
-            'pagination' => [
-                'total' => $replies->total(),
-                'per_page' => $replies->perPage(),
-                'current_page' => $replies->currentPage(),
-                'last_page' => $replies->lastPage(),
-                'from' => $replies->firstItem(),
-                'to' => $replies->lastItem()
-            ],
-            'data' => ForumReplyResource::collection($replies)
-        ];
-
-        return $this->sendResponse($response, 'Replies for question retrieved successfully.');
+        $replies = $replyRepository->getPagination($question->id);
+        return $this->sendResponse($replies, 'Replies for question retrieved successfully.');
     }
 
     /**
@@ -154,8 +144,8 @@ class ForumReplyController extends ApiBaseController
     {
         $this->authorize('store', ForumReply::class);
         $data = ['body' => Purifier::clean($request->body)];
-        $reply = $question->replies()->create($data);
-        return $this->sendResponse($reply, 'Reply store successfully', Response::HTTP_CREATED);
+        $question->replies()->create($data);
+        return $this->sendResponse(TRUE, 'Reply store successfully', Response::HTTP_CREATED);
     }
 
     /**
@@ -205,7 +195,7 @@ class ForumReplyController extends ApiBaseController
         $this->authorize('update', $reply);
         $data = ['body' => Purifier::clean($request->body)];
         $reply->update($data);
-        return $this->sendResponse($reply, 'Reply updated successfully', Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE, 'Reply updated successfully', Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -254,7 +244,7 @@ class ForumReplyController extends ApiBaseController
     {
         $this->authorize('delete', $reply);
         $reply->delete();
-        return $this->sendResponse(NULL, 'Comment deleted successfully', Response::HTTP_NO_CONTENT);
+        return $this->sendResponse(TRUE, 'Comment deleted successfully', Response::HTTP_ACCEPTED);
 
     }
 }

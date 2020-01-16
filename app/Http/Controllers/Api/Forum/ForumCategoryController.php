@@ -101,8 +101,8 @@ class ForumCategoryController extends ApiBaseController
     {
         $this->authorize('store', ForumCategory::class);
         $data =[ 'name' => $request->name ];
-        $category = ForumCategory::create($data);
-        return $this->sendResponse($category, 'Forum category created successfully.', Response::HTTP_CREATED);
+        ForumCategory::create($data);
+        return $this->sendResponse(TRUE, 'Forum category created successfully.', Response::HTTP_CREATED);
     }
 
     /**
@@ -142,7 +142,7 @@ class ForumCategoryController extends ApiBaseController
         $this->authorize('update', ForumCategory::class);
         $data =[ 'name' => $request->name ];
         $forumCategory->update($data);
-        return $this->sendResponse(new ForumCategoryResource($forumCategory),
+        return $this->sendResponse(TRUE,
             'Forum category updated successfully.',
             Response::HTTP_ACCEPTED);
     }
@@ -183,6 +183,6 @@ class ForumCategoryController extends ApiBaseController
     {
         $this->authorize('delete', ForumCategory::class);
         $forumCategory->delete();
-        return $this->sendResponse(NULL,'Forum category deleted successfully',Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Forum category deleted successfully',Response::HTTP_ACCEPTED);
     }
 }

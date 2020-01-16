@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Blog;
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
 use App\Http\Resources\Blog\BlogCommentResource;
 use App\Models\Blog\BlogComment;
+use App\Repositories\CommentRepository;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,7 @@ class BlogCommentController extends ApiBaseController
     {
         $this->middleware('auth:api', ['except' => ['index', 'show']]);
     }
+
     /**
      * @OA\Get(
      *     path="/posts/{blogPost}/comments",
@@ -54,24 +56,13 @@ class BlogCommentController extends ApiBaseController
      * Display a listing of the resource.
      *
      * @param BlogPost $post
+     * @param CommentRepository $commentRepository
      * @return JsonResponse
      */
-    public function index(BlogPost $post)
+    public function index(BlogPost $post, CommentRepository $commentRepository)
     {
-        $comments = BlogComment::where('blog_post_id', $post->id)->paginate(10);
-        $response = [
-            'pagination' => [
-                'total' => $comments->total(),
-                'per_page' => $comments->perPage(),
-                'current_page' => $comments->currentPage(),
-                'last_page' => $comments->lastPage(),
-                'from' => $comments->firstItem(),
-                'to' => $comments->lastItem()
-            ],
-            'data' => BlogCommentResource::collection($comments)
-        ];
-
-        return $this->sendResponse($response, 'Comments for blog post retrieved successfully.');
+        $comments = $commentRepository->getPagination($post->id);
+        return $this->sendResponse($comments, 'Comments for blog post retrieved successfully.');
     }
 
     /**
@@ -155,7 +146,7 @@ class BlogCommentController extends ApiBaseController
         $this->authorize('store', BlogComment::class);
         $data = [ 'body' => Purifier::clean($request->body) ];
         $comment = $post->blogComments()->create($data);
-        return $this->sendResponse($comment,'Comment store successfully',Response::HTTP_CREATED);
+        return $this->sendResponse(TRUE,'Comment store successfully',Response::HTTP_CREATED);
     }
 
     /**
@@ -205,7 +196,7 @@ class BlogCommentController extends ApiBaseController
         $this->authorize('update', $comment);
         $data = [ 'body' => Purifier::clean($request->body) ];
         $comment->update($data);
-        return $this->sendResponse($comment,'Comment updated successfully',Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Comment updated successfully',Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -253,6 +244,6 @@ class BlogCommentController extends ApiBaseController
     {
         $this->authorize('delete', $comment);
         $comment->delete();
-        return $this->sendResponse(NULL,'Comment deleted successfully',Response::HTTP_ACCEPTED);
+        return $this->sendResponse(TRUE,'Comment deleted successfully',Response::HTTP_ACCEPTED);
     }
 }
