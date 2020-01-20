@@ -38,15 +38,15 @@ class Messenger
             ];
         }
 
-        auth('api')->user()->send()->create([
-            'text'       => $request->text,
+        $message = auth('api')->user()->send()->create([
+            'text'         => $request->text,
             'recipient_id' => $request->recipient_id,
-            'dialog_id'=> $dialog->id
+            'dialog_id'    => $dialog->id
         ]);
 
         $message = new MessageResource(Message::where([
             ['recipient_id', $request->recipient_id],
-            ['sender_id', auth()->user()->id]
+            ['sender_id', auth('api')->user()->id]
         ])->latest()->first());
 
         MessageEvent::dispatch([

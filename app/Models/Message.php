@@ -8,6 +8,7 @@ class Message extends Model
 {
     protected $fillable = ['text', 'sender_id', 'recipient_id', 'dialog_id'];
 
+
     public function sender()
     {
         return $this->belongsTo(User::class, 'from_id');

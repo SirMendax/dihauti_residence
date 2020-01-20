@@ -161,6 +161,7 @@ class MessageController extends ApiBaseController
     {
         $this->authorize('view', $dialog);
         $result = Messenger::sendMessage($dialog, $request);
+
         switch ($result['code']){
             case 0:
                 return $this->sendError($result['data'], $result['message'], $result['status']);

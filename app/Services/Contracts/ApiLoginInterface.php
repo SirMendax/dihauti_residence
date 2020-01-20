@@ -4,9 +4,9 @@
 namespace App\Services\Contracts;
 
 
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
 
 interface ApiLoginInterface
 {
-    public function authorize(Request $request);
+    public function authorize(LoginRequest $request);
 }

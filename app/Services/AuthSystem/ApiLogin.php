@@ -4,16 +4,15 @@
 namespace App\Services\AuthSystem;
 
 
+use App\Http\Requests\LoginRequest;
 use App\Http\Resources\RoleResource;
 use App\Services\Contracts\ApiLoginInterface;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Str;
 
 class ApiLogin implements ApiLoginInterface
 {
-    public function authorize(Request $request)
+    public function authorize(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
 
@@ -36,9 +35,8 @@ class ApiLogin implements ApiLoginInterface
             'token' => $token->accessToken,
             'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
             'id'=> $user->id,
+            'user'=> $user->slug,
             'role'=> json_encode(RoleResource::collection($user->roles()->get()))
         ];
     }
-
-
 }

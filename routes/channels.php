@@ -13,4 +13,5 @@
 
 Broadcast::channel('dialog.{dialog_id}', function ($user, $dialog_id) {
     return true;
+    //return $user->dialogs()->contains($dialog_id);
 });

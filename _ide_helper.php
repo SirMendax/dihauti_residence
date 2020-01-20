@@ -3,7 +3,7 @@
 
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 6.10.1 on 2020-01-17 16:28:48.
+ * Generated for Laravel 6.11.0 on 2020-01-20 19:30:17.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -15332,7 +15332,7 @@ namespace Mews\Purifier\Facades {
  
 }
 
-namespace App\Services\Facades { 
+namespace App\Facades { 
 
     /**
      * 
@@ -15347,7 +15347,8 @@ namespace App\Services\Facades {
          */ 
         public static function authorize($request)
         {
-                        return \App\Services\AuthSystem\ApiLogin::authorize($request);
+                        /** @var \App\Services\AuthSystem\ApiLogin $instance */
+                        return $instance->authorize($request);
         }
          
     }
@@ -15752,6 +15753,22 @@ namespace  {
             {
                                 /** @var \Illuminate\Database\Eloquent\Builder $instance */
                                 return $instance->where($column, $operator, $value, $boolean);
+            }
+         
+            /**
+             * Add a basic where clause to the query, and return the first result.
+             *
+             * @param \Closure|string|array $column
+             * @param mixed $operator
+             * @param mixed $value
+             * @param string $boolean
+             * @return \Illuminate\Database\Eloquent\Model|static 
+             * @static 
+             */ 
+            public static function firstWhere($column, $operator = null, $value = null, $boolean = 'and')
+            {
+                                /** @var \Illuminate\Database\Eloquent\Builder $instance */
+                                return $instance->firstWhere($column, $operator, $value, $boolean);
             }
          
             /**
@@ -18489,7 +18506,7 @@ namespace  {
 
     class Purifier extends \Mews\Purifier\Facades\Purifier {}
 
-    class ApiLogin extends \App\Services\Facades\ApiLoginFacade {}
+    class ApiLogin extends \App\Facades\ApiLoginFacade {}
 
     class Flare extends \Facade\Ignition\Facades\Flare {}
  

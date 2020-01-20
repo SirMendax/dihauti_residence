@@ -233,7 +233,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Debugbar' => Barryvdh\Debugbar\Facade::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
-        'ApiLogin' => \App\Services\Facades\ApiLoginFacade::class,
+        'ApiLogin' => \App\Facades\ApiLoginFacade::class,
     ],
 
 ];

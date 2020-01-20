@@ -45,8 +45,9 @@ class User extends Authenticatable
             $role = Role::where('name', 'ROLE_NO_VERIFY')->first();
             $user->roles()->attach($role->id);
             $user->profile()->create();
+            $user->slug = 'id:'.$user->id;
         });
-        static::creating(fn($user) => $user->slug = 'id:'.$user->id);
+        //static::creating(fn($user) => $user->slug = 'id:'.$user->id);
     }
 
     public function getRouteKeyName()

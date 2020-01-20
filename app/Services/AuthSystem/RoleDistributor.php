@@ -14,7 +14,8 @@ class RoleDistributor
      */
     public static function setRole(User $user)
     {
-        $user->roles()->attach(1);
+        $user->roles()->detach(2);
+        $user->roles()->attach(3);
         return $user;
     }
 }
