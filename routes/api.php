@@ -15,8 +15,6 @@ use Illuminate\Http\Request;
 
 Route::group(['namespace' => 'Api'], function () {
 
-    Route::get('/', 'IndexController@index');
-
     Route::get('/messages', 'MessageController@getAllDialog');
     Route::get('/dialog/{dialog}', 'MessageController@getDialog');
     Route::get('/contacts', 'MessageController@getAllUsers');

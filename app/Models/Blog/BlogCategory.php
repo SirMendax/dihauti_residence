@@ -3,12 +3,38 @@
 namespace App\Models\Blog;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use OpenApi\Annotations\OpenApi;
+use Str;
 
 
+/**
+ * @OA\Schema(
+ *     description="BlogCategory model",
+ *     type="object",
+ *     title="Category for blog",
+ * )
+ */
 class BlogCategory extends Model
 {
-    protected $fillable = ['name'];
+    /**
+     * @OA\Property(format="int64")
+     * @var int
+     */
+    public $id;
+
+    /**
+     * @OA\Property(format="string")
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @OA\Property(format="string")
+     * @var string
+     */
+    public $slug;
+
+    protected $fillable = ['name', 'slug'];
     protected static function boot()
     {
         parent::boot();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
+use App\Http\Requests\CategoryStoreRequest;
 use App\Models\Blog\BlogCategory;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Resources\Blog\BlogCategoryResource;
+use Str;
 
 class BlogCategoryController extends ApiBaseController
 {
@@ -79,26 +81,34 @@ class BlogCategoryController extends ApiBaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param CategoryStoreRequest $request
      * @return JsonResponse
      * @throws AuthorizationException
-     *
      * @OA\Post(
-     *     path="/blogCategories",
-     *     operationId="blogCategoryCreate",
-     *     tags={"BlogCategory"},
-     *     summary="Create blog category in database",
-     *     security={
-     *          {"app_id": {}},
-     *     },
-     *     @OA\Response(
+     *    path="/blogCategories",
+     *    operationId="blogCategoryCreate",
+     *    tags={"BlogCategory"},
+     *    summary="Create blog category in database",
+     *    security={
+     *          {"passport": {}},
+     *    },
+     *    @OA\RequestBody(
+     *         description="name new category",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/CategoryStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=201,
      *          description="Blog category created successfully"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
+     *    @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function store(Request $request)
+    public function store(CategoryStoreRequest $request)
     {
         $this->authorize('store', BlogCategory::class);
         $data =[ 'name' => $request->name ];
@@ -109,7 +119,7 @@ class BlogCategoryController extends ApiBaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param CategoryStoreRequest $request
      * @param BlogCategory $blogCategory
      * @return JsonResponse
      * @throws AuthorizationException
@@ -120,7 +130,7 @@ class BlogCategoryController extends ApiBaseController
      *     tags={"BlogCategory"},
      *     summary="Update blog category in database",
      *     security={
-     *          {"app_id": {}},
+     *          {"passport": {}},
      *     },
      *     @OA\Parameter(
      *          name="slug",
@@ -131,17 +141,26 @@ class BlogCategoryController extends ApiBaseController
      *              type="string"
      *          )
      *      ),
-     *     @OA\Response(
+     *    @OA\RequestBody(
+     *         description="name new category",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/CategoryStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=202,
-     *          description="successful operation"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *          description="Blog category uodated successfully"
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
+     *    @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function update(BlogCategory $blogCategory, Request $request)
+    public function update(BlogCategory $blogCategory, CategoryStoreRequest $request)
     {
         $this->authorize('update', BlogCategory::class);
-        $data =[ 'name' => $request->name ];
+        $data = [ 'name' => $request->name, 'slug' => Str::slug($request->name) ];
         $blogCategory->update($data);
         return $this->sendResponse(TRUE, 'Blog category updated successfully.', Response::HTTP_ACCEPTED);
     }

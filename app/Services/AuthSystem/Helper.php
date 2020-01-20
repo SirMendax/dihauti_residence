@@ -1,11 +1,10 @@
 <?php
 
 
-namespace App\Services\Registration;
+namespace App\Services\AuthSystem;
 
 
 use App\Jobs\SendMessage;
-use App\Models\Profile\Profile;
 use App\Models\User;
 use App\Notifications\UserRegistration;
 use Exception;
@@ -31,21 +30,6 @@ class Helper
         ));
     }
 
-    /**
-     * @param User $user
-     * @return array
-     * @throws Exception
-     */
-    public static function createProfile(User $user) : array
-    {
-        try{
-            Profile::create(['user_id' => $user->id]);
-            return ['status' => TRUE];
-        }catch (\Illuminate\Database\QueryException $e){
-            $user->delete();
-            return ['status' => FALSE, 'message' => $e->getMessage()];
-        }
-    }
 
     /**
      * @param string $type
@@ -70,8 +54,11 @@ class Helper
     public static function sendNotifyForAdmin(User $user)
     {
         $admin = self::getAdminUser(User::get());
-        if($admin) Notification::send($admin, new UserRegistration($user));
-        else throw new Exception('Administrator is not found');
+        if($admin){
+            Notification::send($admin, new UserRegistration($user));
+        } else{
+            throw new Exception('Administrator is not found');
+        }
     }
 
     /**

@@ -5,9 +5,34 @@ namespace App\Models\Forum;
 use Illuminate\Database\Eloquent\Model;
 use Str;
 
+/**
+ * @OA\Schema(
+ *     description="ForumCategory model",
+ *     type="object",
+ *     title="Category for forum",
+ * )
+ */
 class ForumCategory extends Model
 {
-    protected $fillable = ['name'];
+    /**
+     * @OA\Property(format="int64")
+     * @var int
+     */
+    public $id;
+
+    /**
+     * @OA\Property(format="string")
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @OA\Property(format="string")
+     * @var string
+     */
+    public $slug;
+
+    protected $fillable = ['name', 'slug'];
 
     protected static function boot()
     {

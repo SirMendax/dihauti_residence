@@ -22,6 +22,7 @@ class CreateBlogPostsTable extends Migration
             $table->string('description');
             $table->bigInteger('blog_category_id')->unsigned();
             $table->bigInteger('user_id')->unsigned();
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
             $table->foreign('blog_category_id')->references('id')->on('blog_categories')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

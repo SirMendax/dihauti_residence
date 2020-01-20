@@ -7,6 +7,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class Handler extends ExceptionHandler
@@ -55,6 +56,8 @@ class Handler extends ExceptionHandler
             return response()->json([
                 'error' => 'Ничего не найдено'
             ], 404);
+        }elseif ($exception instanceof ValidationException) {
+            return response()->json(['errors'=>$exception->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return parent::render($request, $exception);

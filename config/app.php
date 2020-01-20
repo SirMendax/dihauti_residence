@@ -1,5 +1,6 @@
 <?php
 
+
 return [
 
     /*
@@ -178,6 +179,7 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\ApiLoginServiceProvider::class,
 
     ],
 
@@ -231,7 +233,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Debugbar' => Barryvdh\Debugbar\Facade::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
-
+        'ApiLogin' => \App\Services\Facades\ApiLoginFacade::class,
     ],
 
 ];

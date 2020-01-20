@@ -4,7 +4,7 @@
 namespace App\Repositories;
 
 
-use App\Http\Requests\PostRequest;
+use App\Http\Requests\PostStoreRequest;
 use App\Http\Resources\Blog\BlogPostResource;
 use App\Models\Blog\BlogPost;
 use Purifier;
@@ -32,7 +32,7 @@ class PostRepository extends AbstractRepository
         ];
     }
 
-    public function store(PostRequest $request)
+    public function store(PostStoreRequest $request)
     {
         $filterData = [
             'title' => $request->title,
@@ -43,7 +43,7 @@ class PostRepository extends AbstractRepository
         auth('api')->user()->blogPost()->create($filterData);
     }
 
-    public function update(BlogPost $post, PostRequest $request)
+    public function update(BlogPost $post, PostStoreRequest $request)
     {
         $filterData = [
             'title' => $request->title,

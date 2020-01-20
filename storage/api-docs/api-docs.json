@@ -10,11 +10,39 @@
     },
     "servers": [
         {
-            "url": "https://api.dihauti.ru/api",
+            "url": "http://api.dihauti.loc/api",
             "description": "API server"
         }
     ],
     "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "AuthSystem"
+                ],
+                "summary": "Auth in api",
+                "operationId": "authorize",
+                "requestBody": {
+                    "description": "name new category",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successfull"
+                    },
+                    "401": {
+                        "description": "You cannot sign with those credentials"
+                    }
+                }
+            }
+        },
         "/blogCategories": {
             "get": {
                 "tags": [
@@ -38,9 +66,23 @@
                 ],
                 "summary": "Create blog category in database",
                 "operationId": "blogCategoryCreate",
+                "requestBody": {
+                    "description": "name new category",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
                         "description": "Blog category created successfully"
+                    },
+                    "422": {
+                        "description": "Missing Data"
                     },
                     "400": {
                         "description": "Bad request"
@@ -48,7 +90,7 @@
                 },
                 "security": [
                     {
-                        "app_id": []
+                        "passport": []
                     }
                 ]
             }
@@ -98,9 +140,23 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "description": "name new category",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "202": {
-                        "description": "successful operation"
+                        "description": "Blog category uodated successfully"
+                    },
+                    "422": {
+                        "description": "Missing Data"
                     },
                     "400": {
                         "description": "Bad request"
@@ -108,7 +164,7 @@
                 },
                 "security": [
                     {
-                        "app_id": []
+                        "passport": []
                     }
                 ]
             },
@@ -198,9 +254,23 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "description": "data for new comment",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Comment store successfully"
+                        "description": "Comment created successfully"
+                    },
+                    "422": {
+                        "description": "Missing Data"
                     },
                     "400": {
                         "description": "Bad request"
@@ -276,9 +346,23 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "description": "Update comment",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "202": {
                         "description": "Comment updated successfully"
+                    },
+                    "422": {
+                        "description": "Missing Data"
                     },
                     "400": {
                         "description": "Bad request"
@@ -365,12 +449,23 @@
                 ],
                 "summary": "Create yet another post in database",
                 "operationId": "postCreate",
+                "requestBody": {
+                    "description": "Created post",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PostStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
                         "description": "Blog post created successfully"
                     },
-                    "400": {
-                        "description": "Bad request"
+                    "422": {
+                        "description": "Missing Data"
                     }
                 },
                 "security": [
@@ -425,9 +520,23 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "description": "Update post",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PostStoreRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "202": {
                         "description": "Post updated successfully"
+                    },
+                    "422": {
+                        "description": "Missing Data"
                     },
                     "400": {
                         "description": "Bad request"
@@ -1390,8 +1499,139 @@
         }
     },
     "components": {
+        "schemas": {
+            "CategoryStoreRequest": {
+                "title": "Category store request",
+                "description": "Category request models",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name category",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Музыка"
+                    }
+                },
+                "type": "object"
+            },
+            "CommentStoreRequest": {
+                "title": "Comment store request",
+                "description": "Comment request models",
+                "properties": {
+                    "body": {
+                        "title": "Text",
+                        "description": "Text comment",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Lorem ipsum"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "title": "Auth request",
+                "description": "Auth request",
+                "properties": {
+                    "email": {
+                        "title": "Email",
+                        "description": "Email",
+                        "type": "string",
+                        "format": "string",
+                        "example": "exapmple@mail.com"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "description": "Password",
+                        "type": "string",
+                        "format": "string",
+                        "example": "secret_pass"
+                    }
+                },
+                "type": "object"
+            },
+            "PostStoreRequest": {
+                "title": "Post store request",
+                "description": "Post request models",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Id post",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": "1"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "description": "Title post",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Lorem ipsum"
+                    },
+                    "blog_category_id": {
+                        "title": "Blog category id",
+                        "description": "Blog category id for post",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": "1"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Description post",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Lorem ipsum"
+                    },
+                    "body": {
+                        "title": "Text",
+                        "description": "Text post",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Lorem ipsum"
+                    }
+                },
+                "type": "object"
+            },
+            "BlogCategory": {
+                "title": "Category for blog",
+                "description": "BlogCategory model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ForumCategory": {
+                "title": "Category for forum",
+                "description": "ForumCategory model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
-            "Password Based": {
+            "passport": {
                 "type": "apiKey",
                 "name": "Authorization",
                 "in": "header",
@@ -1402,7 +1642,7 @@
                         "scopes": []
                     }
                 },
-                "scheme": "https"
+                "scheme": "http"
             }
         }
     }

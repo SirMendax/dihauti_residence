@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
-use App\Http\Requests\PostRequest;
+use App\Http\Requests\PostStoreRequest;
 use App\Models\Blog\BlogPost;
 use App\Repositories\PostRepository;
 use Exception;
@@ -94,7 +94,7 @@ class BlogPostController extends ApiBaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param PostRequest $request
+     * @param PostStoreRequest $request
      * @param PostRepository $postRepository
      * @return JsonResponse
      * @throws AuthorizationException
@@ -106,14 +106,22 @@ class BlogPostController extends ApiBaseController
      *     security={
      *          {"app_id": {}},
      *     },
-     *     @OA\Response(
+     *     @OA\RequestBody(
+     *         description="Created post",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/PostStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=201,
      *          description="Blog post created successfully"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
      * )
      */
-    public function store(PostRequest $request, PostRepository $postRepository)
+    public function store(PostStoreRequest $request, PostRepository $postRepository)
     {
         $this->authorize('store', BlogPost::class);
         $postRepository->store($request);
@@ -123,7 +131,7 @@ class BlogPostController extends ApiBaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param PostRequest $request
+     * @param PostStoreRequest $request
      * @param BlogPost $post
      * @param PostRepository $postRepository
      * @return JsonResponse
@@ -145,14 +153,23 @@ class BlogPostController extends ApiBaseController
      *              type="string"
      *          )
      *      ),
-     *     @OA\Response(
+     *    @OA\RequestBody(
+     *         description="Update post",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/PostStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=202,
      *          description="Post updated successfully"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
+     *    @OA\Response(response=400, description="Bad request"),
      * )
      */
-    public function update(PostRequest $request, BlogPost $post, PostRepository $postRepository)
+    public function update(PostStoreRequest $request, BlogPost $post, PostRepository $postRepository)
     {
         $this->authorize('update', $post);
         $postRepository->update($post, $request);

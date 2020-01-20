@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
 use App\Http\Resources\RoleResource;
-use App\Services\Registration\RoleDistributor;
-use App\Services\Registration\VerificationUser;
+use App\Services\AuthSystem\RoleDistributor;
+use App\Services\AuthSystem\VerificationUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

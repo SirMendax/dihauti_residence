@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
+use App\Http\Requests\CommentStoreRequest;
 use App\Http\Resources\Blog\BlogCommentResource;
 use App\Models\Blog\BlogComment;
 use App\Repositories\CommentRepository;
@@ -127,25 +128,34 @@ class BlogCommentController extends ApiBaseController
      *              type="string"
      *          )
      *      ),
-     *     @OA\Response(
+     *    @OA\RequestBody(
+     *         description="data for new comment",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/CommentStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=201,
-     *          description="Comment store successfully"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *          description="Comment created successfully"
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
+     *    @OA\Response(response=400, description="Bad request"),
      * )
      *
      * Store a newly created resource in storage.
      *
      * @param BlogPost $post
-     * @param Request $request
+     * @param CommentStoreRequest $request
      * @return JsonResponse
      * @throws AuthorizationException
      */
-    public function store(BlogPost $post, Request $request)
+    public function store(BlogPost $post, CommentStoreRequest $request)
     {
         $this->authorize('store', BlogComment::class);
         $data = [ 'body' => Purifier::clean($request->body) ];
-        $comment = $post->blogComments()->create($data);
+        $$post->blogComments()->create($data);
         return $this->sendResponse(TRUE,'Comment store successfully',Response::HTTP_CREATED);
     }
 
@@ -176,22 +186,31 @@ class BlogCommentController extends ApiBaseController
      *              type="integer"
      *          )
      *      ),
-     *     @OA\Response(
+     *    @OA\RequestBody(
+     *         description="Update comment",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/CommentStoreRequest")
+     *    ),
+     *    @OA\Response(
      *          response=202,
      *          description="Comment updated successfully"
-     *       ),
-     *      @OA\Response(response=400, description="Bad request"),
+     *    ),
+     *    @OA\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     ),
+     *    @OA\Response(response=400, description="Bad request"),
      * )
      *
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param CommentStoreRequest $request
      * @param BlogPost $post
      * @param BlogComment $comment
      * @return JsonResponse
      * @throws AuthorizationException
      */
-    public function update(Request $request, BlogPost $post, BlogComment $comment)
+    public function update(CommentStoreRequest $request, BlogPost $post, BlogComment $comment)
     {
         $this->authorize('update', $comment);
         $data = [ 'body' => Purifier::clean($request->body) ];

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services\Registration;
+namespace App\Services\AuthSystem;
 
 
 use App\Models\User;

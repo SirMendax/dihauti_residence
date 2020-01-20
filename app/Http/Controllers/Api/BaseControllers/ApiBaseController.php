@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\BaseControllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use OpenApi\Annotations\OpenApi;
 
 /**
  * @OA\Info(
@@ -26,7 +25,7 @@ use OpenApi\Annotations\OpenApi;
  *     in="header",
  *     name="Authorization",
  *     scheme="https",
- *     securityScheme="Password Based",
+ *     securityScheme="passport",
  *     @OA\Flow(
  *         flow="password",
  *         authorizationUrl="/login",

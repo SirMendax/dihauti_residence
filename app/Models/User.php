@@ -7,10 +7,10 @@ use App\Models\Blog\BlogPost;
 use App\Models\Forum\ForumQuestion;
 use App\Models\Forum\ForumReply;
 use App\Models\Profile\Profile;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -25,7 +25,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
+    protected $fillable = ['id',
         'name', 'email', 'password', 'verification_code'
     ];
 
@@ -35,8 +35,42 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($user) {
+            $role = Role::where('name', 'ROLE_NO_VERIFY')->first();
+            $user->roles()->attach($role->id);
+            $user->profile()->create();
+        });
+        static::creating(fn($user) => $user->slug = 'id:'.$user->id);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnline()
+    {
+        return Cache::has('user-is-online-' . $this->id);
+
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeVerified($query)
+    {
+        return $query->where('verified', TRUE);
+    }
 
     /**
      * @return HasMany
@@ -98,22 +132,6 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'recipient_id');
     }
 
-    /**
-     * @return bool
-     */
-    public function isOnline()
-    {
-    	return Cache::has('user-is-online-' . $this->id);
-
-    }
-
-    /**
-     * @return string
-     */
-    public function getRouteKeyName()
-    {
-        return 'slug';
-    }
 
     /**
      * @return BelongsToMany
@@ -131,12 +149,23 @@ class User extends Authenticatable
         return $this->belongsToMany(Dialog::class, 'dialog_user', 'user_id', 'dialog_id');
     }
 
-    protected static function boot()
+
+    public function isBanned()
     {
-        parent::boot();
-        static::creating(function($user){
-            $user->slug = Str::slug($user->name);
-        });
+        $roles = $this->roles()->get();
+        foreach ($roles as $v){
+            if($v['name'] === 'ROLE_BANNED') return true;
+            else return false;
+        }
+    }
+
+    public function isNoVerify()
+    {
+        $roles = $this->roles()->get();
+        foreach ($roles as $v){
+            if($v['name'] === 'ROLE_NO_VERIFY') return true;
+            else return false;
+        }
     }
 
     public function isAdmin()
@@ -144,6 +173,17 @@ class User extends Authenticatable
         $roles = $this->roles()->get();
         foreach ($roles as $v){
             if($v['name'] === 'ROLE_ADMIN') return true;
+            elseif($this->isBanned() or $this->isNoVerify()) return false;
+            else return false;
+        }
+    }
+
+    public function isModerator()
+    {
+        $roles = $this->roles()->get();
+        foreach ($roles as $v){
+            if($v['name'] === 'ROLE_MODERATOR' or $this->isAdmin()) return true;
+            elseif($this->isBanned() or $this->isNoVerify()) return false;
             else return false;
         }
     }
@@ -152,7 +192,8 @@ class User extends Authenticatable
     {
         $roles = $this->roles()->get();
         foreach ($roles as $v){
-            if($v['name'] === 'ROLE_EDITOR' or $this->isAdmin()) return true;
+            if($v['name'] === 'ROLE_EDITOR' or $this->isModerator()) return true;
+            elseif($this->isBanned() or $this->isNoVerify()) return false;
             else return false;
         }
     }
@@ -162,6 +203,7 @@ class User extends Authenticatable
         $roles = $this->roles()->get();
         foreach ($roles as $v){
             if($v['name'] === 'ROLE_COMMENTATOR' or $this->isEditor()) return true;
+            elseif($this->isBanned() or $this->isNoVerify()) return false;
             else return false;
         }
     }

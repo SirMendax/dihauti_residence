@@ -2,47 +2,45 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use ApiLogin;
 use App\Http\Controllers\Api\BaseControllers\ApiBaseController;
-use App\Http\Resources\RoleResource;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
-use App\Models\User;
 
 class LoginController extends ApiBaseController
 {
     /**
      * Handle the incoming request.
      *
-     * @param Request $request
+     * @OA\Post(
+     *    path="/login",
+     *    operationId="authorize",
+     *    tags={"AuthSystem"},
+     *    summary="Auth in api",
+     *    @OA\RequestBody(
+     *         description="name new category",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/LoginRequest")
+     *    ),
+     *    @OA\Response(
+     *          response=200,
+     *          description="Login successfull"
+     *    ),
+     *    @OA\Response(response=401, description="You cannot sign with those credentials"),
+     * )
+     *
+     * @param LoginRequest $request
      * @return JsonResponse
      */
-    public function __invoke(Request $request)
+    public function __invoke(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $result = ApiLogin::authorize($request);
 
-        if (!Auth::guard('web')->attempt($credentials)) {
+        if ($result === false) {
             return $this->sendError('Unauthorised', 'You cannot sign with those credentials', 401);
+        } else {
+            return $this->sendResponse($result, 'Login successfully', 200);
         }
-        $user = User::where('email', $request->email)->first();
-
-        $token = $user->createToken(config('MyApp'));
-
-        $token->token->expires_at = $request->remember_me ?
-            Carbon::now()->addMonth() :
-            Carbon::now()->addDay();
-
-        $token->token->save();
-
-        return response()->json([
-            'token_type' => 'Bearer',
-            'token' => $token->accessToken,
-            'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
-            'user'=> Str::slug($user->name),
-            'id'=> $user->id,
-            'role'=> $user->roles()->count() > 0 ? json_encode(RoleResource::collection($user->roles()->get())) : 0
-        ], 200);
     }
 }

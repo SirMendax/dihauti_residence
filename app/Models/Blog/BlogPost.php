@@ -3,8 +3,9 @@
 namespace App\Models\Blog;
 
 use App\Models\Like;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Str;
 use App\Models\User;
 
 
@@ -17,9 +18,7 @@ class BlogPost extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function($blogPost){
-            $blogPost->slug = Str::slug($blogPost->title);
-        });
+        static::creating(fn($blogPost) => $blogPost->slug = Str::slug($blogPost->title));
     }
     public function getRouteKeyName()
     {
@@ -46,13 +45,22 @@ class BlogPost extends Model
         return "/blog/$this->slug";
     }
 
-    public static function setExtract($string)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopePublished($query)
     {
-        $start = 0;
-        $length = 120;
-        $trimmarker = '...';
-        $len = strlen(trim($string));
-        $newstring = ( ($len > $length) && ($len != 0) ) ? rtrim(mb_substr($string, $start, $length - strlen($trimmarker))) . $trimmarker : $string;
-        return $newstring;
+        return $query->whereNotNull('published_at')->whereDate('published_at', '<=', today());
     }
+
+//    public static function setExtract($string)
+//    {
+//        $start = 0;
+//        $length = 120;
+//        $trimmarker = '...';
+//        $len = strlen(trim($string));
+//        $newstring = ( ($len > $length) && ($len != 0) ) ? rtrim(mb_substr($string, $start, $length - strlen($trimmarker))) . $trimmarker : $string;
+//        return $newstring;
+//    }
 }
